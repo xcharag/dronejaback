@@ -44,15 +44,17 @@ const typeDefs = gql`
     }
     
     type BestSellers {
+        id: String
         name: String
         lastName: String
-        total: Float
+        totalSpent: Float
     }
     
     type BestClients {
+        id: String
         name: String
         lastName: String
-        total: Float
+        totalSpent: Float
     }
     
     type MostDaySales {
@@ -62,7 +64,8 @@ const typeDefs = gql`
     
     type BestProducts {
         name: String
-        total: Float
+        description: String
+        totalQuantity: Int
     }
     
     type BestClientsByDate {
@@ -111,11 +114,13 @@ const typeDefs = gql`
         client: ID
         seller: ID
         status: DefinedStatus
+        methodPayment: String
     }
     
     input OrderGroupInput {
         id: ID
         quantity: Int
+        name: String
     }
     
     input OrderUpdate {
@@ -139,10 +144,9 @@ const typeDefs = gql`
         getOrdersBySeller: [Order]
         
         #Advanced Queries
-        #bestSellers: [BestSellers]
-        #bestClients: [BestClients]
-        #mostDaySales: [MostDaySales]
-        #bestProducts: [BestProducts]
+        getMostSoldProducts: [BestProducts]
+        getBestClients: [BestClients]
+        getBestSellers: [BestSellers]
     }
     
     #MUTATIONS

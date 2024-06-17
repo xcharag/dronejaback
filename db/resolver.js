@@ -95,6 +95,154 @@ const resolvers = {
                 return {};
             }
         },
+
+        getMostSoldProducts: async () => {
+            const pipeline = [
+                {
+                    $unwind: "$order"
+                },
+                {
+                    $addFields:{
+                        'order.id': {$toObjectId: "$order.id"}
+                    }
+                },
+                {
+                    $group:{
+                        _id: "$order.id",
+                        totalQuantity: {$sum: "$order.quantity"}
+                    }
+                },
+                {
+                    $sort:{
+                        totalQuantity: -1
+                    }
+                },
+                {
+                    $lookup:{
+                        from: "products",
+                        localField: "_id",
+                        foreignField: "_id",
+                        as: "product"
+                    }
+                },
+                {
+                    $unwind: "$product"
+                },
+                {
+                    $project:{
+                        _id: 0,
+                        name: "$product.name",
+                        description: "$product.description",
+                        totalQuantity: 1
+                    }
+                }
+            ];
+            try {
+                const products = await Order.aggregate(pipeline);
+                return products;
+            } catch (e) {
+                console.log("Error al devolver los productos: " + e);
+                return {};
+            }
+        },
+
+        getBestSellers: async () => {
+            const pipeline = [
+                {
+                    $group: {
+                        _id: "$seller",
+                        totalSpent: { $sum: "$total" }
+                    }
+                },
+                {
+                    $addFields:{
+                        seller: {$toObjectId: "$_id"}
+                    }
+                },
+                {
+                    $lookup:{
+                        from: "users",
+                        localField: "seller",
+                        foreignField: "_id",
+                        as: "sellerdata"
+                    }
+                },
+                {
+                    $unwind: "$sellerdata"
+                },
+                {
+                    $project:{
+                        _id: "$sellerdata._id",
+                        name: "$sellerdata.name",
+                        lastName: "$sellerdata.lastName",
+                        totalSpent: 1
+                    }
+                },
+                {
+                    $sort:{
+                        totalSpent: -1
+                    }
+                },
+                {
+                    $limit: 3
+                }
+                ];
+            try {
+                const sellers = await Order.aggregate(pipeline);
+                return sellers;
+            } catch (e) {
+                console.log("Error al devolver los vendedores: " + e);
+                return {};
+            }
+        },
+
+        getBestClients: async () => {
+            const pipeline = [
+                {
+                    $group: {
+                        _id: "$client",
+                        totalSpent: { $sum: "$total" }
+                    }
+                },
+                {
+                    $addFields:{
+                        seller: {$toObjectId: "$_id"}
+                    }
+                },
+                {
+                    $lookup:{
+                        from: "users",
+                        localField: "seller",
+                        foreignField: "_id",
+                        as: "clientdata"
+                    }
+                },
+                {
+                    $unwind: "$clientdata"
+                },
+                {
+                    $project:{
+                        _id:0,
+                        id: "$clientdata._id",
+                        name: "$clientdata.name",
+                        lastName: "$clientdata.lastName",
+                        totalSpent: 1
+                    }
+                },
+                {
+                    $sort:{
+                        totalSpent: -1
+                    }
+                }
+            ];
+            try {
+                const clients = await Order.aggregate(pipeline);
+                return clients;
+            } catch (e) {
+                console.log("Error al devolver los clientes: " + e);
+                return {};
+            }
+        }
     },
 
     Mutation: {
@@ -194,11 +342,13 @@ const resolvers = {
         },
 
         //ORDERS
-        newOrder: async (_, {input}, ctx) => {
+        newOrder: async (_, {input}) => {
             const {order} = input;
             for await (const item of order) {
                 const {id} = item;
                 const product = await Product.findById(id);
+                console.log(input);
+                console.log(product);
                 if (item.quantity > product.stock) {
                     throw new Error(`El producto: ${product.name} excede la cantidad disponible`);
                 } else {
@@ -208,7 +358,6 @@ const resolvers = {
             }
 
             const newOrder = new Order(input);
-            newOrder.client = ctx.user.id;
             await newOrder.save();
             return newOrder;
         },

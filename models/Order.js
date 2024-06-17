@@ -25,7 +25,7 @@ const orderSchema = mongoose.Schema({
     },
     methodPayment: {
         type: String,
-        default: 'TARJETA CREDITO/DEBITO'
+        default: 'TARJETA'
     },
     created: {
         type: Date,
