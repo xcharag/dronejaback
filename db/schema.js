@@ -154,7 +154,7 @@ const typeDefs = gql`
         getMostSoldProducts: [BestProducts]
         getBestClients: [BestClients]
         getBestSellers: [BestSellers]
-        exam: [examResp]
+        clientesporseller: [examResp]
     }
     
     #MUTATIONS

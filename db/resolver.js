@@ -244,7 +244,7 @@ const resolvers = {
             }
         },
 
-        exam: async () => {
+        clientesporseller: async () => {
             const pipeline = [
                 {
                     $group:{
