@@ -242,6 +242,49 @@ const resolvers = {
                 console.log("Error al devolver los clientes: " + e);
                 return {};
             }
+        },
+
+        exam: async () => {
+            const pipeline = [
+                {
+                    $group:{
+                        _id: "$associatedSeller",
+                        count: {$sum: 1}
+                    }
+                },
+                {
+                    $addFields:{
+                        seller: {$toObjectId: "$_id"}
+                    }
+                },
+                {
+                    $lookup:{
+                        from: "users",
+                        localField: "seller",
+                        foreignField: "_id",
+                        as: "sellerdata"
+                    }
+                },
+                {
+                    $unwind: "$sellerdata"
+                },
+                {
+                    $project:{
+                        _id: 0,
+                        id: "$sellerdata._id",
+                        name: "$sellerdata.name",
+                        lastName: "$sellerdata.lastName",
+                        count: 1
+                    }
+                }
+                ];
+            try {
+                const users = await User.aggregate(pipeline);
+                return users;
+            } catch (e) {
+                console.log("Error al devolver los usuarios: " + e);
+                return {};
+            }
         }
     },
 

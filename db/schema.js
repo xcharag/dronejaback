@@ -6,6 +6,13 @@ const typeDefs = gql`
         token: String
     }
     
+    type examResp {
+        name: String
+        lastname: String
+        id: ID
+        count: Int
+    }
+    
     type User {
         id: ID
         name: String
@@ -147,6 +154,7 @@ const typeDefs = gql`
         getMostSoldProducts: [BestProducts]
         getBestClients: [BestClients]
         getBestSellers: [BestSellers]
+        exam: [examResp]
     }
     
     #MUTATIONS
